@@ -41,8 +41,9 @@ def hello():
 @app.route('/students', methods=['POST'])
 def createStudent():
     global id, data
-    data['students'].append({'id' : id, 'first_name': request.form['name']})
-    student = [stud for stud in data['students'] if stud["first_name"] == (request.form['name'])]
+    cc = request.get_json()
+    data['students'].append({'id' : id, 'first_name': cc['name']})
+    student = [stud for stud in data['students'] if stud["first_name"] == (cc['name'])]
     id = id+1
     return jsonify({"student":student})
 
@@ -54,19 +55,21 @@ def getStudent(id):
 @app.route('/classes', methods=['POST'])
 def createClass():
     global cid, data
-    data['classes'].append({'class_id' : cid, 'class_name': request.form['name']})
-    student = [stud for stud in data['classes'] if stud["class_name"] == (request.form['name'])]
+    cc = request.get_json()
+    data['classes'].append({'class_id' : cid, 'class_name': cc['name']})
+    student = [stud for stud in data['classes'] if stud["class_name"] == (cc['name'])]
     cid = cid+1
     return jsonify({"Class":student})
 
-@app.route('/classes', methods=['GET'])
-def getClass():
+@app.route('/classes/<id>', methods=['GET'])
+def getClass(id):
     cl = [cl for cl in data['classes'] if cl["class_id"] == int(request.view_args['id'])]
     return jsonify({"Class":cl})
 
 @app.route('/classes/<id>', methods=['PATCH'])
 def updateClass(id):
-    stud = [stud for stud in data['students'] if stud["id"] == int(request.form['student_id'])]
+    cc = request.get_json()
+    stud = [stud for stud in data['students'] if stud["id"] == int(cc['student_id'])]
     index = 0
     for x in data['classes']:
         index = index+1
@@ -77,7 +80,7 @@ def updateClass(id):
     if ('students' in cl):
         flag = False
         for y in cl['students']:
-            if y['id'] == int(request.form['student_id']):
+            if y['id'] == int(cc['student_id']):
                 flag = True
                 return "Student Already Exists in the class"
         if (flag == False):
